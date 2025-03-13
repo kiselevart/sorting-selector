@@ -1,44 +1,56 @@
 import random
+import json
 
-def generate_random_list(n):
-    return [random.randint(0, n) for _ in range(n)]
-
-def generate_sorted_list(n):
+def generate_list(n):
+    """Create a sorted list of n elements (0 to n-1)."""
     return list(range(n))
 
-def generate_reversed_list(n):
-    return list(range(n, 0, -1))
+def generate_duplicates_list(n, unique_count=5):
+    """Create a list of n elements with many duplicates, drawn from 0 to unique_count-1."""
+    return [random.randint(0, unique_count - 1) for _ in range(n)]
 
-def generate_nearly_sorted_list(n, disorder_ratio=0.05):
-    # Start with a sorted list, then perform a few random swaps.
-    lst = list(range(n))
+def randomize_list(lst):
+    """Return a shuffled copy of the provided list."""
+    new_lst = lst.copy()
+    random.shuffle(new_lst)
+    return new_lst
+
+def reverse_list(lst):
+    """Return a reversed copy of the provided list."""
+    return lst[::-1]
+
+def disorder_list(lst, disorder_ratio=0.05):
+    """
+    Return a copy of the provided list with a number of random swaps.
+    disorder_ratio indicates the fraction of elements to swap (at least one).
+    """
+    new_lst = lst.copy()
+    n = len(new_lst)
     num_swaps = max(1, int(disorder_ratio * n))
     for _ in range(num_swaps):
         i, j = random.sample(range(n), 2)
-        lst[i], lst[j] = lst[j], lst[i]
-    return lst
+        new_lst[i], new_lst[j] = new_lst[j], new_lst[i]
+    return new_lst
 
-def generate_duplicates_list(n, unique_count=5):
-    # Generate a list with many duplicates.
-    return [random.randint(0, unique_count - 1) for _ in range(n)]
-
-# Define the sizes you want to test
+# Define the sizes you want to test.
 sizes = [10, 100, 1000, 10000, 100000]
 
-# Create a dataset dictionary that maps each size to different cases
+# Create a dataset dictionary that maps each size to different cases.
 dataset = {}
 for n in sizes:
+    base_list = generate_list(n)  # This is our sorted base list.
     dataset[n] = {
-        "random": generate_random_list(n),
-        "sorted": generate_sorted_list(n),
-        "reversed": generate_reversed_list(n),
-        "nearly_sorted": generate_nearly_sorted_list(n),
-        "duplicates (unique 5)": generate_duplicates_list(n, 5),
-        "duplicates (unique 10)": generate_duplicates_list(n, 10),
-        "duplicates (half unique)": generate_duplicates_list(n, int(n/2))
+        "random": randomize_list(base_list),
+        "sorted": base_list,
+        "reversed": reverse_list(base_list),
+        "disorder 0.05": disorder_list(base_list),
+        "disorder 0.10": disorder_list(base_list),
+        "disorder 0.50": disorder_list(base_list),
+        "duplicates 5 unique": generate_duplicates_list(n, 5),
+        "duplicates 10 unique": generate_duplicates_list(n, 10),
+        "duplicates n/2 unique": generate_duplicates_list(n, int(n/2))
     }
 
-# Example: print out the first 10 elements of each case for n=1000
-n = 1000
-for case, lst in dataset[n].items():
-    print(f"{case} (first 10 elements): {lst[:10]}")
+# Write the dataset to a JSON file.
+with open('/Users/kisel/uni/apal/Algorithm-Selector/Implementation/dataset.json', 'w') as f:
+    json.dump(dataset, f, indent=4)
