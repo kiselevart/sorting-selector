@@ -71,15 +71,3 @@ def full_heuristic(lst):
     norm_runs = runs(lst)
     length = len(lst)
     return norm_shan_entropy, norm_runs, length
-
-list1 = [1, 1, 1, 1, 1, 1]
-list2 = [1, 1, 1, 1, 1, 2]
-list3 = [1, 1, 2, 2, 2, 2]
-list4 = [1, 2, 3, 4, 5, 6]
-list5 = [1, 1, 1, 1, 1, 99]
-list6 = [5, 6, 3, 4, 1, 2]
-
-lists = [list1, list2, list3, list4, list5, list6]
-
-for i in range(len(lists)):
-    print(full_heuristic(lists[i]))
