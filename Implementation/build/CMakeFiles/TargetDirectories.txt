@@ -1,0 +1,13 @@
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/sorters.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/edit_cache.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/rebuild_cache.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/list_install_components.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/install.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/install/local.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/CMakeFiles/install/strip.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/edit_cache.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/rebuild_cache.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/list_install_components.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/install.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/install/local.dir
+/Users/kisel/uni/apal/Algorithm-Selector/Implementation/build/cpp-sort/CMakeFiles/install/strip.dir
