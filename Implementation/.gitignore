@@ -1,0 +1,48 @@
+# Build directories
+build/
+out/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Generated shared libraries and binaries
+*.dylib
+*.dll
+*.exe
+
+# Object files and intermediate build files
+*.o
+*.obj
+*.a
+
+# Python bytecode and caches
+*.pyc
+*.pyo
+
+# Jupyter Notebook checkpoints
+**/.ipynb_checkpoints/
+
+# Editor temporary files
+*~
+*.tmp
+
+# Log files
+*.log
