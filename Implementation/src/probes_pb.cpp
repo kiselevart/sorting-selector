@@ -85,7 +85,7 @@ std::vector<std::string> get_all_probe_names() {
 std::string get_probe_explanation(const std::string& probe_name) {
     static const std::map<std::string, std::string> explanations = {
         {"dis", "Displacement: Sum of distances each element must move to reach its sorted position"},
-        {"enc", "Entropy: Measure of disorder in the sequence based on information theory"},
+        {"enc", "Encroachment: Computes the number of encroaching lists that can be extracted from X minus one"},
         {"exc", "Exchanges: Minimum number of exchanges needed to sort the sequence"},
         {"ham", "Hamming distance: Number of elements that are not in their sorted position"},
         {"inv", "Inversions: Number of pairs of elements that are in the wrong order"},
