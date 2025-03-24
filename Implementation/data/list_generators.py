@@ -5,9 +5,26 @@ def generate_list(n):
     """Create a sorted list of n elements (0 to n-1)."""
     return list(range(n))
 
-def generate_duplicates_list(n, unique_count=5):
-    """Create a list of n elements with many duplicates, drawn from 0 to unique_count-1."""
-    return [random.randint(0, unique_count - 1) for _ in range(n)]
+def generate_duplicates_list(n, unique_count):
+    """Return a sorted list of length n containing exactly unique_count distinct values."""
+    if unique_count > n:
+        raise ValueError("unique_count cannot exceed total length n")
+    base = list(range(unique_count))
+    # fill the remainder with random picks from those unique values
+    base += [random.choice(base) for _ in range(n - unique_count)]
+    return sorted(base)
+
+def generate_duplicates_list_ratio(n, duplicate_ratio):
+    """
+    Return a sorted list of length n where duplicate_ratio ∈ [0,1].
+      • 0.0 ⇒ all elements unique
+      • 1.0 ⇒ all elements identical
+    """
+    if not 0 <= duplicate_ratio <= 1:
+        raise ValueError("duplicate_ratio must be between 0 and 1")
+    # Compute how many unique values we need
+    unique_count = max(1, int(round(n * (1 - duplicate_ratio))))
+    return generate_duplicates_list(n, unique_count)
 
 def randomize_list(lst):
     """Return a shuffled copy of the provided list."""
