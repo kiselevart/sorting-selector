@@ -9,16 +9,6 @@ sys.path.insert(0, build_dir)
 import sorters
 
 def benchmark_sorter(sorter_name, arr, num_runs=100):
-    """
-    Benchmarks the specified sorter function from the sorters module.
-    Parameters:
-        sorter_name (str): The name of the sorter function (e.g., 'quick_sort', 'merge_sort', 'insertion_sort').
-        arr (list): The list of values to sort.
-        num_runs (int): Number of times to run the sorting function to get an average runtime.
-    Returns:
-        float: The average execution time in seconds.
-    """
-    # Retrieve the sorter function from the module
     sorter_func = getattr(sorters, sorter_name, None)
     if sorter_func is None:
         raise ValueError(f"Sorter '{sorter_name}' is not available in the sorters module.")

@@ -2,7 +2,7 @@ import sys
 import os
 
 # Add the build directory to Python path
-build_dir = os.path.abspath('build')
+build_dir = os.path.abspath('../')
 sys.path.insert(0, build_dir)
 
 import sorters

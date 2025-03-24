@@ -11,8 +11,9 @@ BenchmarkResult<Sorter> benchmark_sorter(Sorter& sorter, const std::vector<std::
     auto start = std::chrono::high_resolution_clock::now();
     
     for (const auto& arr : test_arrays) {
+        std::vector<int> arr_copy = arr;  
+
         auto array_start = std::chrono::high_resolution_clock::now();
-        std::vector<int> arr_copy = arr;  // Create a copy to sort
         sorter(arr_copy);
         auto array_end = std::chrono::high_resolution_clock::now();
         

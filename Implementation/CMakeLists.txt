@@ -27,7 +27,10 @@ add_subdirectory(cpp-sort)
 
 # Add the Python module
 pybind11_add_module(sorters 
-    src/cppsort_module.cpp
+    src/sorters_pb.cpp
+)
+pybind11_add_module(benchmark_pb
+    src/benchmark_pb.cpp
 )
 
 # Include directories
@@ -37,5 +40,12 @@ target_include_directories(sorters PRIVATE
     ${pybind11_INCLUDE_DIRS}
 )
 
+target_include_directories(benchmark_pb PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${Python3_INCLUDE_DIRS}
+    ${pybind11_INCLUDE_DIRS}
+)
+
 # Link against cpp-sort
 target_link_libraries(sorters PRIVATE cpp-sort::cpp-sort)
+target_link_libraries(benchmark_pb PRIVATE cpp-sort::cpp-sort)
