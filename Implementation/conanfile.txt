@@ -1,0 +1,6 @@
+[requires]
+cpp-sort/1.16.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
