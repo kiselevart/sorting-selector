@@ -15,15 +15,15 @@ def generate_duplicates_list(n, unique_count):
     return sorted(base)
 
 def generate_duplicates_list_ratio(n, duplicate_ratio):
-    """
-    Return a sorted list of length n where duplicate_ratio ∈ [0,1].
-      • 0.0 ⇒ all elements unique
-      • 1.0 ⇒ all elements identical
-    """
     if not 0 <= duplicate_ratio <= 1:
         raise ValueError("duplicate_ratio must be between 0 and 1")
-    # Compute how many unique values we need
-    unique_count = max(1, int(round(n * (1 - duplicate_ratio))))
+    if n <= 0:
+        return []
+
+    # Compute unique_count, then cap it at n
+    unique_count = max(1, round(n * (1 - duplicate_ratio)))
+    unique_count = min(unique_count, n)
+
     return generate_duplicates_list(n, unique_count)
 
 def randomize_list(lst):
@@ -41,6 +41,7 @@ def disorder_list(lst, disorder_ratio=0.05):
     Return a copy of the provided list with a number of random swaps.
     disorder_ratio indicates the fraction of elements to swap (at least one).
     """
+    if not lst: return []
     new_lst = lst.copy()
     n = len(new_lst)
     num_swaps = max(1, int(disorder_ratio * n))

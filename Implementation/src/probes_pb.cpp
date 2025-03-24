@@ -157,4 +157,22 @@ PYBIND11_MODULE(probes, m) {
         },
         py::arg("probe_name"), py::arg("array"),
         "Benchmark a probe function given its name by measuring the execution time.");
+    
+    m.def("max_for_size",
+        [](const std::string& probe_name, int n) -> std::size_t {
+            if (probe_name == "dis")    return cppsort::probe::dis.max_for_size(n);
+            if (probe_name == "enc")    return cppsort::probe::enc.max_for_size(n);
+            if (probe_name == "exc")    return cppsort::probe::exc.max_for_size(n);
+            if (probe_name == "ham")    return cppsort::probe::ham.max_for_size(n);
+            if (probe_name == "inv")    return cppsort::probe::inv.max_for_size(n);
+            if (probe_name == "max")    return cppsort::probe::max.max_for_size(n);
+            if (probe_name == "mono")   return cppsort::probe::mono.max_for_size(n);
+            if (probe_name == "osc")    return cppsort::probe::osc.max_for_size(n);
+            if (probe_name == "rem")    return cppsort::probe::rem.max_for_size(n);
+            if (probe_name == "runs")   return cppsort::probe::runs.max_for_size(n);
+            if (probe_name == "sus")    return cppsort::probe::sus.max_for_size(n);
+            throw std::invalid_argument("Unknown probe: " + probe_name);
+        },
+        py::arg("probe_name"), py::arg("n"),
+        "Return the maximum possible value of the given probe for an array of length n");
 }
