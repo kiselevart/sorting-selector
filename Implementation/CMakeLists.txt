@@ -16,9 +16,6 @@ project(sorters)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# set(Python3_ROOT_DIR "/Users/kisel/miniconda3/envs/your_env")
-# set(CMAKE_PREFIX_PATH "/Users/kisel/miniconda3/envs/your_env")
-
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 
@@ -29,9 +26,6 @@ add_subdirectory(cpp-sort)
 pybind11_add_module(sorters 
     src/sorters_pb.cpp
 )
-pybind11_add_module(benchmark_pb
-    src/benchmark_pb.cpp
-)
 
 # Include directories
 target_include_directories(sorters PRIVATE 
@@ -40,12 +34,5 @@ target_include_directories(sorters PRIVATE
     ${pybind11_INCLUDE_DIRS}
 )
 
-target_include_directories(benchmark_pb PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${Python3_INCLUDE_DIRS}
-    ${pybind11_INCLUDE_DIRS}
-)
-
 # Link against cpp-sort
 target_link_libraries(sorters PRIVATE cpp-sort::cpp-sort)
-target_link_libraries(benchmark_pb PRIVATE cpp-sort::cpp-sort)
