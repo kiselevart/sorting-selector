@@ -12,14 +12,12 @@
 namespace py = pybind11;
 
 double benchmark_sorting_function(const std::function<void(std::vector<int>&)>& sort_func, 
-                                 const std::vector<std::vector<int>>& arrays) {
+                                  std::vector<int> array) { // Pass by value
     // Start timing
     auto start = std::chrono::high_resolution_clock::now();
     
-    // Sort each array in the input
-    for (auto arr : arrays) {
-        sort_func(arr);
-    }
+    // Sorting the copy of the array
+    sort_func(array);
     
     // End timing
     auto end = std::chrono::high_resolution_clock::now();
@@ -41,8 +39,8 @@ std::function<void(std::vector<int>&)> create_sorter_func() {
 PYBIND11_MODULE(sorters, m) {
     m.doc() = "Benchmarking module for cpp-sort algorithms";
     
-    // Function that takes a sorter name and arrays to benchmark
-    m.def("benchmark_sorter", [](const std::string& sorter_name, const std::vector<std::vector<int>>& arrays) {
+    // Function that takes a sorter name and array to benchmark
+    m.def("benchmark_sorter", [](const std::string& sorter_name, const std::vector<int>& array) {
         std::function<void(std::vector<int>&)> sort_func;
         
         // Map sorter name to the corresponding function
@@ -64,9 +62,6 @@ PYBIND11_MODULE(sorters, m) {
         else if (sorter_name == "mel_sort") {
             sort_func = create_sorter_func<cppsort::mel_sorter>();
         }
-        else if (sorter_name == "merge_insertion_sort") {
-            sort_func = create_sorter_func<cppsort::merge_insertion_sorter>();
-        }
         else if (sorter_name == "merge_sort") {
             sort_func = create_sorter_func<cppsort::merge_sorter>();
         }
@@ -78,9 +73,6 @@ PYBIND11_MODULE(sorters, m) {
         }
         else if (sorter_name == "quick_merge_sort") {
             sort_func = create_sorter_func<cppsort::quick_merge_sorter>();
-        }
-        else if (sorter_name == "selection_sort") {
-            sort_func = create_sorter_func<cppsort::selection_sorter>();
         }
         else if (sorter_name == "ska_sort") {
             sort_func = create_sorter_func<cppsort::ska_sorter>();
@@ -111,16 +103,9 @@ PYBIND11_MODULE(sorters, m) {
         }
         
         // Run the benchmark and return the time
-        return benchmark_sorting_function(sort_func, arrays);
-    }, py::arg("sorter_name"), py::arg("arrays"),
-       "Benchmark the specified sorter on a list of arrays, returning time in milliseconds");
-    
-    // Overloaded version that takes a function directly (useful for custom sorting functions)
-    m.def("benchmark_function", [](const std::function<void(std::vector<int>&)>& sort_func, 
-                                 const std::vector<std::vector<int>>& arrays) {
-        return benchmark_sorting_function(sort_func, arrays);
-    }, py::arg("sort_func"), py::arg("arrays"),
-       "Benchmark a custom sorting function on a list of arrays, returning time in milliseconds");
+        return benchmark_sorting_function(sort_func, array);
+    }, py::arg("sorter_name"), py::arg("array"),
+       "Benchmark the specified sorter on an array, returning time in milliseconds");
 
     // Function to return a list of all available sorter names
     m.def("list_sorters", []() -> std::vector<std::string> {
@@ -131,12 +116,10 @@ PYBIND11_MODULE(sorters, m) {
             "heap_sort",
             "insertion_sort",
             "mel_sort",
-            "merge_insertion_sort",
             "merge_sort",
             "poplar_sort",
             "quick_sort",
             "quick_merge_sort",
-            "selection_sort",
             "ska_sort",
             "slab_sort",
             "smooth_sort",
