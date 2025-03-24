@@ -3,9 +3,26 @@
 #include <cpp-sort/probes.h>
 #include <vector>
 #include <string>
+#include <functional>
+#include <chrono>
 #include <map>
 
 namespace py = pybind11;
+
+double benchmark_probe_function(const std::function<void(std::vector<int>&)>& probe_func, 
+                                  std::vector<int> array) { // Pass by value
+    // Start timing
+    auto start = std::chrono::high_resolution_clock::now();
+    
+    probe_func(array); 
+
+    // End timing
+    auto end = std::chrono::high_resolution_clock::now();
+    
+    // Calculate and return the duration in milliseconds
+    std::chrono::duration<double, std::milli> duration = end - start;
+    return duration.count();
+}
 
 // Apply probe directly by name
 std::size_t apply_probe_by_name(const std::string& probe_name, const std::vector<int>& arr) {
@@ -117,4 +134,27 @@ PYBIND11_MODULE(probes, m) {
         return get_probe_explanation(probe_name);
     }, py::arg("probe_name"),
        "Explain the meaning of the specified presortedness probe");
+
+    m.def("benchmark_probe_function", 
+          [](py::function probe_func, std::vector<int> array) -> double {
+              // Wrap the Python function into a lambda matching std::function<void(std::vector<int>&)>
+              auto func_wrapper = [probe_func](std::vector<int>& arr) {
+                  probe_func(arr);
+              };
+              return benchmark_probe_function(func_wrapper, array);
+          },
+          py::arg("probe_func"), py::arg("array"),
+          "Benchmark a probe function by measuring the execution time (in milliseconds) it takes to run on a copy of the provided array");
+
+    m.def("benchmark_probe_by_name", 
+        [](const std::string& probe_name, const std::vector<int>& array) -> double {
+            // Create a lambda that wraps our apply_probe_by_name call.
+            // We ignore the return value since benchmark_probe_function just measures time.
+            auto func = [probe_name](std::vector<int>& arr) {
+                (void) apply_probe_by_name(probe_name, arr);
+            };
+            return benchmark_probe_function(func, array);
+        },
+        py::arg("probe_name"), py::arg("array"),
+        "Benchmark a probe function given its name by measuring the execution time.");
 }

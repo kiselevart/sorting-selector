@@ -28,7 +28,6 @@ double benchmark_sorting_function(const std::function<void(std::vector<int>&)>& 
     return duration.count();
 }
 
-
 // Function to create lambda wrappers for different sorters
 template<typename Sorter>
 std::function<void(std::vector<int>&)> create_sorter_func() {
