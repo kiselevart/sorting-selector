@@ -7,6 +7,7 @@
 #include <functional>
 #include <utility>
 #include <vector>
+#include <string>
 
 namespace py = pybind11;
 
@@ -120,4 +121,30 @@ PYBIND11_MODULE(sorters, m) {
         return benchmark_sorting_function(sort_func, arrays);
     }, py::arg("sort_func"), py::arg("arrays"),
        "Benchmark a custom sorting function on a list of arrays, returning time in milliseconds");
+
+    // Function to return a list of all available sorter names
+    m.def("list_sorters", []() -> std::vector<std::string> {
+        return {
+            "adaptive_shivers_sort",
+            "cartesian_tree_sort",
+            "counting_sort",
+            "heap_sort",
+            "insertion_sort",
+            "mel_sort",
+            "merge_insertion_sort",
+            "merge_sort",
+            "poplar_sort",
+            "quick_sort",
+            "quick_merge_sort",
+            "selection_sort",
+            "ska_sort",
+            "slab_sort",
+            "smooth_sort",
+            "spin_sort",
+            "splay_sort",
+            "spread_sort",
+            "std_sort",
+            "tim_sort"
+        };
+    }, "Return a list of all supported sorter names");
 }

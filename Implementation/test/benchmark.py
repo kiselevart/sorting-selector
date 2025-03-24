@@ -1,4 +1,3 @@
-import time
 import sys
 import os
 
@@ -6,9 +5,15 @@ import os
 build_dir = os.path.abspath('../')
 sys.path.insert(0, build_dir)
 
-print(build_dir)
-import sorters
+import pandas as pd
+import numpy as np
 
-arrs = [[5, 1, 7, 3], [3,1,4,1,5,9,2]]
-time = sorters.benchmark_sorter("insertion_sort", arrs)
-print(time)
+import sorters
+from data import list_generators
+
+sorts = []
+for name, obj in sorters.__dict__.items():
+    if callable(obj):
+        sorts.append(name)
+
+print(sorts)
