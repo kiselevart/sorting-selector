@@ -39,12 +39,6 @@ std::function<void(std::vector<int>&)> create_sorter_func() {
 
 // Define a function to get the sorter function by name
 std::function<void(std::vector<int>&)> get_sorter_by_name(const std::string& sorter_name) {
-    if (sorter_name == "adaptive_shivers_sort") {
-        return create_sorter_func<cppsort::adaptive_shivers_sorter>();
-    }
-    else if (sorter_name == "cartesian_tree_sort") {
-        return create_sorter_func<cppsort::cartesian_tree_sorter>();
-    }
     else if (sorter_name == "counting_sort") {
         return create_sorter_func<cppsort::counting_sorter>();
     }
@@ -54,14 +48,8 @@ std::function<void(std::vector<int>&)> get_sorter_by_name(const std::string& sor
     else if (sorter_name == "insertion_sort") {
         return create_sorter_func<cppsort::insertion_sorter>();
     }
-    else if (sorter_name == "mel_sort") {
-        return create_sorter_func<cppsort::mel_sorter>();
-    }
     else if (sorter_name == "merge_sort") {
         return create_sorter_func<cppsort::merge_sorter>();
-    }
-    else if (sorter_name == "poplar_sort") {
-        return create_sorter_func<cppsort::poplar_sorter>();
     }
     else if (sorter_name == "quick_sort") {
         return create_sorter_func<cppsort::quick_sorter>();
@@ -72,17 +60,8 @@ std::function<void(std::vector<int>&)> get_sorter_by_name(const std::string& sor
     else if (sorter_name == "ska_sort") {
         return create_sorter_func<cppsort::ska_sorter>();
     }
-    else if (sorter_name == "slab_sort") {
-        return create_sorter_func<cppsort::slab_sorter>();
-    }
-    else if (sorter_name == "smooth_sort") {
-        return create_sorter_func<cppsort::smooth_sorter>();
-    }
     else if (sorter_name == "spin_sort") {
         return create_sorter_func<cppsort::spin_sorter>();
-    }
-    else if (sorter_name == "splay_sort") {
-        return create_sorter_func<cppsort::splay_sorter>();
     }
     else if (sorter_name == "spread_sort") {
         return create_sorter_func<cppsort::spread_sorter>();
@@ -119,21 +98,14 @@ PYBIND11_MODULE(sorters, m) {
     // Function to return a list of all available sorter names
     m.def("list_sorters", []() -> std::vector<std::string> {
         return {
-            "adaptive_shivers_sort",
-            "cartesian_tree_sort",
             "counting_sort",
             "heap_sort",
             "insertion_sort",
-            "mel_sort",
             "merge_sort",
-            "poplar_sort",
             "quick_sort",
             "quick_merge_sort",
             "ska_sort",
-            "slab_sort",
-            "smooth_sort",
             "spin_sort",
-            "splay_sort",
             "spread_sort",
             "std_sort",
             "tim_sort"
