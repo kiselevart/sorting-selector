@@ -39,7 +39,7 @@ std::function<void(std::vector<int>&)> create_sorter_func() {
 
 // Define a function to get the sorter function by name
 std::function<void(std::vector<int>&)> get_sorter_by_name(const std::string& sorter_name) {
-    else if (sorter_name == "counting_sort") {
+    if (sorter_name == "counting_sort") {
         return create_sorter_func<cppsort::counting_sorter>();
     }
     else if (sorter_name == "heap_sort") {

@@ -1,31 +1,14 @@
-import sys
-import os
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
 from collections import Counter
-
-# Add the build directory to Python path
-build_dir = os.path.abspath('/Users/kisel/uni/apal/Algorithm-Selector/Implementation/lib')
-sys.path.insert(0, build_dir)
-
-# Add the data directory to Python path
-data_dir = os.path.abspath('/Users/kisel/uni/apal/Algorithm-Selector/Implementation/data')
-sys.path.insert(0, data_dir)
-
-import sorters
-import probes
+import math
+import os
+import sys
 import time
 
-import list_generators as lg
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
-def find_range(arr) -> int:
-    return max(arr) - min(arr)
-
-def find_entropy(arr) -> int:
-    return find_range(arr)/len(arr)
-
-def find_frequency(arr) -> int:
+def find_frequency(arr):
     return Counter(arr)
 
 def find_avg_dup_pos(arr):
@@ -43,10 +26,22 @@ def find_avg_dup_distinct(arr):
     freq = Counter(arr) 
     n = len(arr)  
     d = len(freq) 
-    
-    sum_sq = sum(f * f for f in freq.values())
 
     if d > 0:
         return  (n - d) / d
     else:
         return 0  
+
+def find_entropy(arr):
+    n = len(arr)
+    if n == 0:
+        return 0.0  
+
+    freq = Counter(arr) 
+
+    entropy = 0.0
+    for count in freq.values():
+        p = count / n
+        entropy -= p * math.log2(p)
+
+    return entropy
