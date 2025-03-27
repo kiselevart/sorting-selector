@@ -3,112 +3,70 @@
 #include <pybind11/functional.h>
 #include <cpp-sort/sorters.h>
 #include <cpp-sort/sorter_traits.h>
-#include <cpp-sort/probes.h>
 #include <chrono>
 #include <functional>
-#include <utility>
 #include <vector>
 #include <string>
 
 namespace py = pybind11;
 
-double benchmark_sorting_function(const std::function<void(std::vector<int>&)>& sort_func, 
-                                  std::vector<int> array) { // Pass by value
-    // Start timing
+double benchmark_sorting_function(const std::function<void(std::vector<double>&)>& sort_func,
+                                  std::vector<double> array) {
     auto start = std::chrono::high_resolution_clock::now();
-    
-    // Sorting the copy of the array
     sort_func(array);
-    
-    // End timing
     auto end = std::chrono::high_resolution_clock::now();
-    
-    // Calculate and return the duration in milliseconds
-    std::chrono::duration<double, std::milli> duration = end - start;
-    return duration.count();
+    return std::chrono::duration<double, std::milli>(end - start).count();
 }
 
-// Function to create lambda wrappers for different sorters
 template<typename Sorter>
-std::function<void(std::vector<int>&)> create_sorter_func() {
-    return [](std::vector<int>& arr) {
+std::function<void(std::vector<double>&)> create_sorter_func() {
+    return [](std::vector<double>& arr) {
         Sorter sorter;
         sorter(arr);
     };
 }
 
-// Define a function to get the sorter function by name
-std::function<void(std::vector<int>&)> get_sorter_by_name(const std::string& sorter_name) {
-    if (sorter_name == "counting_sort") {
-        return create_sorter_func<cppsort::counting_sorter>();
-    }
-    else if (sorter_name == "heap_sort") {
-        return create_sorter_func<cppsort::heap_sorter>();
-    }
-    else if (sorter_name == "insertion_sort") {
-        return create_sorter_func<cppsort::insertion_sorter>();
-    }
-    else if (sorter_name == "merge_sort") {
-        return create_sorter_func<cppsort::merge_sorter>();
-    }
-    else if (sorter_name == "quick_sort") {
-        return create_sorter_func<cppsort::quick_sorter>();
-    }
-    else if (sorter_name == "quick_merge_sort") {
-        return create_sorter_func<cppsort::quick_merge_sorter>();
-    }
-    else if (sorter_name == "ska_sort") {
-        return create_sorter_func<cppsort::ska_sorter>();
-    }
-    else if (sorter_name == "spin_sort") {
-        return create_sorter_func<cppsort::spin_sorter>();
-    }
-    else if (sorter_name == "spread_sort") {
-        return create_sorter_func<cppsort::spread_sorter>();
-    }
-    else if (sorter_name == "std_sort") {
-        return create_sorter_func<cppsort::std_sorter>();
-    }
-    else if (sorter_name == "tim_sort") {
-        return create_sorter_func<cppsort::tim_sorter>();
-    }
-    else {
-        throw std::invalid_argument("Unknown sorter: " + sorter_name);
-    }
+std::function<void(std::vector<double>&)> get_sorter_by_name(const std::string& name) {
+    //if (name == "counting_sort")      return create_sorter_func<cppsort::counting_sorter>();
+    if (name == "heap_sort")          return create_sorter_func<cppsort::heap_sorter>();
+    if (name == "insertion_sort")     return create_sorter_func<cppsort::insertion_sorter>();
+    if (name == "merge_sort")         return create_sorter_func<cppsort::merge_sorter>();
+    if (name == "quick_sort")         return create_sorter_func<cppsort::quick_sorter>();
+    if (name == "quick_merge_sort")   return create_sorter_func<cppsort::quick_merge_sorter>();
+    //if (name == "ska_sort")           return create_sorter_func<cppsort::ska_sorter>();
+    if (name == "spin_sort")          return create_sorter_func<cppsort::spin_sorter>();
+    //if (name == "spread_sort")        return create_sorter_func<cppsort::spread_sorter>();
+    if (name == "std_sort")           return create_sorter_func<cppsort::std_sorter>();
+    if (name == "tim_sort")           return create_sorter_func<cppsort::tim_sorter>();
+    throw std::invalid_argument("Unknown sorter: " + name);
 }
 
 PYBIND11_MODULE(sorters, m) {
-    m.doc() = "Module for cpp-sort algorithms with benchmarking capabilities";
+    m.doc() = "Module for cpp-sort algorithms (double) with benchmarking";
 
-    // Direct sorting function
-    m.def("sort", [](const std::string& sorter_name, std::vector<int> array) {
-        auto sort_func = get_sorter_by_name(sorter_name);
-        sort_func(array);
-        return array;
-    }, py::arg("sorter_name"), py::arg("array"),
-       "Sort the array using the specified sorter and return the sorted array");
+    m.def("sort",
+          [](const std::string& sorter_name, std::vector<double> array) {
+              auto sort_func = get_sorter_by_name(sorter_name);
+              sort_func(array);
+              return array;
+          },
+          py::arg("sorter_name"), py::arg("array"),
+          "Sort the array using the specified sorter and return the sorted array");
 
-    // Function that takes a sorter name and array to benchmark
-    m.def("benchmark_sorter", [](const std::string& sorter_name, const std::vector<int>& array) {
-        auto sort_func = get_sorter_by_name(sorter_name);
-        return benchmark_sorting_function(sort_func, array);
-    }, py::arg("sorter_name"), py::arg("array"),
-       "Benchmark the specified sorter on an array, returning time in milliseconds");
+    m.def("benchmark_sorter",
+          [](const std::string& sorter_name, const std::vector<double>& array) {
+              auto sort_func = get_sorter_by_name(sorter_name);
+              return benchmark_sorting_function(sort_func, array);
+          },
+          py::arg("sorter_name"), py::arg("array"),
+          "Benchmark the specified sorter on an array (in ms)");
 
-    // Function to return a list of all available sorter names
-    m.def("list_sorters", []() -> std::vector<std::string> {
-        return {
-            "counting_sort",
-            "heap_sort",
-            "insertion_sort",
-            "merge_sort",
-            "quick_sort",
-            "quick_merge_sort",
-            "ska_sort",
-            "spin_sort",
-            "spread_sort",
-            "std_sort",
-            "tim_sort"
+    m.def("list_sorters", []() {
+        return std::vector<std::string>{ // counting_sort removed
+            "heap_sort", "insertion_sort", "merge_sort",
+            "quick_sort", "quick_merge_sort", "spin_sort",
+            "std_sort", "tim_sort"
+            // "counting_sort", "ska_sort", "spread_sort"
         };
     }, "Return a list of all supported sorter names");
 }

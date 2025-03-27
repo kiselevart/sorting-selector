@@ -44,6 +44,14 @@ def disorder_list(lst, disorder_ratio=0.05):
         new_lst[i], new_lst[j] = new_lst[j], new_lst[i]
     return new_lst
 
+def generate_random_list(n):
+    lst = generate_list(n)
+    random.shuffle(lst)
+    return lst
+
+def generate_reversed_list(n):
+    return reverse_list(generate_list(n))
+
 def generate_uniform_list(n, low=0, high=100):
     return [random.uniform(low, high) for _ in range(n)]
 
@@ -63,60 +71,51 @@ def generate_clustered_list(n, clusters=3, spread=5):
 def generate_geometric_list(n, start=1, ratio=2):
     return [start * (ratio ** i) for i in range(n)]
 
-def generate_sine_wave_list(n, amplitude=1, frequency=1.0, noise=0.1):
+def generate_sinewave_list(n, amplitude=1, frequency=1.0, noise=0.1):
     return [amplitude * math.sin(frequency * i) + random.uniform(-noise, noise) for i in range(n)]
 
 def main():
-    sizes = [10, 100, 1000, int(1e4), int(1e5), int(1e6), int(2e6)]
+    sizes = [10, 100, 1000, 10000]
+    #sizes.append(int(1e5))
+    #sizes.append(int(1e6))
+    #sizes.append(int(2e6))
     dataset = {}
 
-    for n in tqdm(sizes, desc="Generating Datasets", position=0):
-        base_list = generate_list(n)
-        list_types = [
-            "sorted", "random", "reversed", 
-            "disorder_0.05", "disorder_0.10", "disorder_0.20", 
-            "duplicates_5_unique", "uniform", "normal", 
-            "exponential", "zipf", "clustered", 
-            "geometric", "sine_wave"
-        ]
-        dataset[str(n)] = {}
-        for list_type in tqdm(list_types, desc=f"Processing size {n}", position=1, leave=False):
-            if list_type == "random":
-                dataset[str(n)][list_type] = randomize_list(base_list)
-            elif list_type == "reversed":
-                dataset[str(n)][list_type] = reverse_list(base_list)
-            elif list_type == "disorder_0.05":
-                dataset[str(n)][list_type] = disorder_list(base_list, disorder_ratio=0.05)
-            elif list_type == "disorder_0.10":
-                dataset[str(n)][list_type] = disorder_list(base_list, disorder_ratio=0.10)
-            elif list_type == "disorder_0.20":
-                dataset[str(n)][list_type] = disorder_list(base_list, disorder_ratio=0.20)
-            elif list_type == "duplicates_5_unique":
-                dataset[str(n)][list_type] = sorted([random.choice(range(5)) for _ in range(n)])
-            elif list_type == "uniform":
-                dataset[str(n)][list_type] = generate_uniform_list(n, low=0, high=100)
-            elif list_type == "normal":
-                dataset[str(n)][list_type] = generate_normal_list(n, mean=50, std=10)
-            elif list_type == "exponential":
-                dataset[str(n)][list_type] = generate_exponential_list(n, scale=1.0)
-            elif list_type == "zipf":
-                dataset[str(n)][list_type] = generate_zipf_list(n, a=2)
-            elif list_type == "clustered":
-                dataset[str(n)][list_type] = generate_clustered_list(n, clusters=3, spread=5)
-            elif list_type == "sine_wave":
-                dataset[str(n)][list_type] = generate_sine_wave_list(n, amplitude=10, frequency=0.1, noise=0.5)
+    list_types = [
+        "random", "reversed", 
+        "disorder_0.05", "disorder_0.10", "disorder_0.20", 
+        "duplicates_0.01", "duplicates_0.1", "duplicates_0.2", "uniform", "normal", 
+        "exponential", "zipf", "clustered", "sinewave"
+    ]
 
-    # Build a DataFrame with one row per (size, list_type) pair and the full list as a column.
     rows = []
-    for size, lists in tqdm(dataset.items(), desc="Creating DataFrame", position=0):
-        for list_type, lst in tqdm(lists.items(), desc=f"Processing size {size}", position=1, leave=False):
-            rows.append({
-                "list_type": list_type,
-                "list": lst
-            })
+
+    for size in tqdm(sizes, desc="Generating lists"):
+        base_list = generate_list(size)
+
+        for list_type in tqdm(list_types, desc=f"Processing size {size}", leave=False):
+            args = list_type.split("_")
+
+            for _ in range(1000):
+                if args[0] == "disorder":
+                    result = disorder_list(base_list.copy(), float(args[1]))
+
+                elif args[0] == "duplicates":
+                    result = generate_duplicates_list_ratio(size, float(args[1]))
+
+                else:
+                    func = globals().get(f"generate_{args[0]}_list")
+                    if not callable(func):
+                        raise ValueError(f"No function named generate_{args[0]}_list")
+                    result = func(size)
+
+                rows.append({
+                    "list_type": list_type,
+                    "data": result
+                })
 
     df = pd.DataFrame(rows)
-    df.to_feather('varied_dataset.feather')
+    df.to_feather("varied_dataset.feather")
     print("Dataset generation complete. Saved to varied_dataset.feather")
 
 if __name__ == "__main__":

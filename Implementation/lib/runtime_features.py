@@ -125,9 +125,7 @@ def extract_features(arr):
     features['dis'] = find_dis(arr)
     features['mono'] = find_mono(arr)
     features['runs'] = find_runs(arr)
-    features['skewness'] = find_skewness(arr)
-    features['kurtosis'] = find_kurtosis(arr)
-    #features['categorical_skew'] = categorical_skew(arr)
-    #features['categorical_kurtosis'] = categorical_kurtosis(arr)
+    features['categorical_skew'] = categorical_skew(arr)
+    features['categorical_kurtosis'] = categorical_kurtosis(arr)
     
     return features
