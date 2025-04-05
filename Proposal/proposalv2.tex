@@ -1,0 +1,117 @@
+\documentclass{article}
+
+\usepackage{graphicx} % Required for inserting images
+\usepackage{placeins}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage[a4paper, left=1in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{breakurl}
+\usepackage{sectsty}
+\usepackage[]{helvet}
+\usepackage{titling}
+\usepackage{titlesec}
+
+\titlespacing*{\section}{0pt}{1ex}{1ex}
+
+%\allsectionsfont{\sffamily\bfseries}
+\pretitle{\begin{center}\sffamily\bfseries\Large}
+\posttitle{\par\end{center}}
+\preauthor{\begin{center}\sffamily\bfseries}
+\postauthor{\par\end{center}}
+\predate{\begin{center}\sffamily\bfseries}
+\postdate{\par\end{center}}
+
+\usetikzlibrary{automata, positioning, arrows.meta}
+
+\renewcommand{\leq}{\leqslant}
+\renewcommand{\geq}{\geqslant}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
+\newcommand{\vsp}{\vspace{0.5em}}
+\newcommand{\expect}{\mathbb{E}}
+\newcommand{\prob}{\mathbf{P}}
+\newcommand{\ruler}{
+    \vspace{1em}
+    \hrule
+    \vspace{1em}
+}
+\newcommand{\bsq}{\hfill $\blacksquare$}
+
+
+\lstset{
+    language=C++,          % Set the language for syntax highlighting
+    numbers=left,          % Display line numbers on the left
+    numberstyle=\tiny\color{gray},  % Style for line numbers
+    rulecolor=\color{black},         % Border color around the code block
+    basicstyle=\ttfamily\footnotesize, % Set font style and size (smaller font)
+    keywordstyle=\color{blue},   % Syntax highlighting for keywords
+    commentstyle=\color{green},  % Syntax highlighting for comments
+    stringstyle=\color{red},   % Syntax highlighting for strings
+    morekeywords={auto, register, inline}, % Add extra C++ keywords if necessary
+}
+
+\title{Project Proposal: Dynamic Selection of Optimal Sorting Algorithms at Runtime}
+\author{Artem Kiselev}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent Sorting is a core operation in computer science, yet no single algorithm uniformly outperforms others across all data scenarios. This project proposes to develop a system that dynamically selects the most efficient sorting algorithm at runtime based on the intrinsic properties of the input data. By integrating real-time data analysis with machine learning models, the system will adaptively choose sorting strategies, thereby optimizing performance across a broad spectrum of datasets.
+\end{abstract}
+
+\section{Problem Description}
+Traditional sorting algorithms such as quicksort, mergesort, and heapsort each exhibit fixed performance profiles that may not be optimal for every data distribution. For example, while quicksort generally performs well on average, its worst-case time complexity degrades to $O(n^2)$—particularly when applied to nearly sorted data. In contrast, insertion sort is inefficient for large, random datasets but excels when the input is nearly sorted due to its adaptive characteristics.
+
+This dichotomy illustrates the broader algorithm selection problem, a meta-algorithmic challenge of choosing the best algorithm for each individual instance from a diverse portfolio. The key is to identify, in real time, the specific characteristics of the input data that predict which algorithm will perform best. A system capable of such dynamic selection has the potential to significantly enhance overall sorting performance.
+
+\section{Literature Review}
+A critical component in developing a dynamic selection system is determining the relevant features of the input data. Mannila's work on \textit{presortedness} \cite{Mannila1985MeasuresOP} introduces a key concept that quantifies how ordered a dataset already is, which in turn helps to predict the optimal sorting strategy. Building on this, Petersson and Moffat \cite{PETERSSON1995153} propose a refined measure of presortedness that effectively adapts to other known measures in the literature. Further analysis of adaptive sorting techniques is provided by Estvill-Castro and Wood \cite{adaptivesortingsurvey}, who explore a range of presortedness metrics and their implications for sorting efficiency.
+
+In 2023, Google DeepMind et al. \cite{alphadev} published a work on using Deep Reinforcement Learning to improve existing sorting algorithms, with parts of their findings being incorporated into LLVM. Although this paper may not directly inform the project, it is motivating to see how machine learning methods can enhance sorting algorithm design and performance.
+
+Complementing these theoretical approaches, practical benchmarks are crucial for understanding real-world performance. The benchmarking data compiled on the GitHub page by Morwenn \cite{cppsort_benchmarks} provides detailed empirical measurements of various sorting algorithms under different conditions. This resource will be greatly beneficial towards determining which algorithms should be included in the portfolio.
+
+Finally, Rice’s seminal framework for algorithm selection \cite{ricealgorithmselection} formalizes the process of mapping input characteristics to algorithm performance. This framework will be instrumental when attempting to theoretically formulate and verify the problem, along with the findings and methods of the project.
+
+\section{Proposed Approach}
+The proposed system will incorporate the following components:
+\begin{enumerate}
+    \item \textbf{Data Profiling Module:} Analyzes incoming data to extract features such as size, existing order (presortedness), and data distribution. Metrics like the number of inversions, runs, las, and others outlined in Mannila's \cite{Mannila1985MeasuresOP} paper will be computed to quantify presortedness.
+    \item \textbf{Algorithm Repository:} Maintains a collection of sorting algorithms with annotated performance characteristics, including time complexity, space complexity, and adaptability to specific data patterns.
+    \item \textbf{Decision Engine:} Employs machine learning models trained on historical data to predict the most suitable sorting algorithm based on the profiled data characteristics. Features for the model may include data size, presortedness measures, and distribution patterns.
+    \item \textbf{Execution Monitor:} Oversees the sorting process, collecting performance metrics to refine the decision engine's predictions over time through reinforcement learning techniques.
+\end{enumerate}
+
+\noindent My practical approach towards implementing the project will be as follows:
+\begin{enumerate}
+    \item \textbf{Algorithm Selection:} Select sorting algorithms into the algorithm portfolio that have an advantage in a meaningful amount of scenarios. Achieve this by looking at papers mentioned in the literature review.
+    \item \textbf{Dataset Engineering:} Design a varied enough set of input data to test the algorithm portfolio on. Cross-reference this with the literature.
+    \item \textbf{Machine Learning and Feature Selection:} Apply ML techniques on various combinations of features to obtain the most optimal trained model. Will likely perform this using Jupyter Notebooks for convenience.
+    \item \textbf{Exporting Model:} Export the trained model coefficients or decision tree into C++.
+    \item \textbf{Feature Extraction Tooling:} Develop the tooling in C++ to efficiently extract features from the input data and use the trained model to select an algorithm at runtime.
+    \item \textbf{Empirical Testing and Formal Verification:} Expanded on below in the Evaluation section.
+\end{enumerate}
+
+\section{Evaluation}
+The system's performance will be benchmarked against traditional sorting algorithms using datasets with varying sizes and characteristics. Metrics such as execution time, memory usage, and scalability will be measured to evaluate efficiency gains.
+
+The decision engine's predictions will be assessed by comparing the selected algorithm's performance against the optimal choice determined through exhaustive analysis. Metrics will include the percentage of correct selections and the performance gap between the chosen and optimal algorithms.
+
+If time allows, formal theoretical verification of the problem will be attempted on to support or disprove the empirical findings.
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document} 
