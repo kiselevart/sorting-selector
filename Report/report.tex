@@ -19,6 +19,7 @@
 \usepackage{sectsty}
 \usepackage[]{helvet}
 \usepackage{titling}
+\usepackage{enumitem}
 \usepackage{titlesec}
 
 \titlespacing*{\section}{0pt}{1ex}{1ex}
@@ -76,35 +77,144 @@ Sorting is a fundamental task that appears across various applications in comput
 
 Successfully addressing this question and constructing an effective predictive model would represent a meaningful advancement. Such a model, capable of analyzing a dataset's characteristics and predicting the optimal sorting strategy based on that analysis, could deliver substantial performance improvements over current static approaches. In practical terms, this could significantly enhance efficiency in real-world scenarios, including large-scale database operations, data-intensive computations, and latency-sensitive applications, providing tangible benefits over existing sorting implementations.
 
-\section{Problem Formalization}
-This question is an instance of the algorithm selection problem, formulated by John Rice in 1976 \cite{ricealgorithmselection}. It is formally stated as follows: \\
-\textbf{Given:}
-\begin{itemize}
-    \item A problem space $\mathcal{P}$, containing all possible problem instances.
-    \item A feature space $\mathcal{F}$, where each $f(x) \in \mathcal{F}$ represents measurable characteristics of problem $x \in \mathcal{P}$.
-    \item An algorithm space $\mathcal{A}$, containing all applicable algorithms $A_i$.
-    \item A performance space $\mathbb{R}^n$, where $p(A_i,x)$ represents the performance of algorithm $A_i \in \mathcal{A}$ on problem $x \in \mathcal{P}$.
-    \item The final algorithm performance metric $||p||$, obtained by normalizing the raw performance measures.
-\end{itemize}
-
-\noindent \textbf{Find:} A selection mapping 
-\[
-S: \mathcal{F} \rightarrow \mathcal{A}
-\]
-that maximizes performance according to some criteria.
+\section{Background and Problem \\ Formalization}
+\subsection{Algorithm Selection Problem}
+This question is an instance of the algorithm selection problem, formulated by John Rice in 1976 \cite{ricealgorithmselection}. It is formally stated as follows: 
 
 \vsp
 
-In our context, the problem space $\mathcal{P}$ consists of datasets that require sorting. An instance $x \in \mathcal{P}$ is a list to be sorted. The feature space $\mathcal{F}$ comprises measurable characteristics of these datasets, such as size, distribution patterns, Shannon entropy \cite{shannonentropy}, and, most importantly, measures of presortedness. These measures tell us the pre-existing order of a given list \cite{Mannila1985MeasuresOP}.
+\noindent\textbf{Given:}
+\begin{itemize}[itemsep=0.05em, topsep=0pt, leftmargin=1em]
+    \item A problem space $\mathcal{P}$, containing all possible problem instances.
+    \item A feature space $\mathcal{F}$, where each $f(x)\in\mathcal{F}$ represents measurable characteristics of problem $x\in\mathcal{P}$.
+    \item An algorithm space $\mathcal{A}$, containing all applicable algorithms $A_i$.
+    \item A performance space $\mathbb{R}^n$, where $p(A_i,x)$ represents the performance of algorithm $A_i\in\mathcal{A}$ on problem $x\in\mathcal{P}$.
+    \item The final algorithm performance metric $||p||$, obtained by normalizing the raw performance measures.
+\end{itemize}
 
-The algorithm space $\mathcal{A}$ includes various sorting algorithms like QuickSort, MergeSort, InsertionSort, and others. For simplicity, our performance space is defined as $\{0,1\}$, where a value of 1 indicates that the selection algorithm has correctly identified the fastest sorter for a given problem instance.
+\noindent\textbf{Find:} A selection mapping 
+\[
+S:\mathcal{F}\rightarrow\mathcal{A}
+\]
+that maximizes performance according to some criteria.
+
+\subsection{Measures of Presortedness}
+Before we discuss how the defined model applies to our research question, we must talk about measures of presortedness, which are a measurement of the pre-existing order of a list. A good measure of presortedness must satisfy the following criteria:
+
+\vsp
+
+\noindent \emph{Let $m$ be a measure of presortedness, and $X, Y$ be lists:}
+\begin{enumerate}[itemsep=0.05em, topsep=0pt]
+    \item $m(X) = 0$ if $X$ is \emph{fully sorted in ascending order}.
+    \item If $X = [x_1, \cdots, x_n]$, $Y= [y_1, \cdots, y_n]$, and 
+    \[
+    x_i < x_j \iff y_i < y_j \quad \text{for all } i \text{ and } j,
+    \]
+    then $m(X) = m(Y)$.
+    \item If $X \subseteq Y$, then $m(X) \leq m(Y)$.
+    \item If $X < Y$, then $m(XY) \leq m(X) + m(Y)$.
+    \item \emph{For any element} $a$, $m(a + X) \leq |X| + m(X)$.
+\end{enumerate}
+
+For this project, I will explicitly mention the following three measures of presortedness:
+
+\vsp
+
+
+\noindent \textbf{Runs \cite{knuth1973}:}
+The number of maximal contiguous ascending subsequences in a list $X$. 
+\[
+\text{Runs}(X) = \left|\{i : 1 \leq i < n \text{ and } a_{i+1} < a_i\}\right|.
+\]
+This takes $O(n)$ time, and $O(1)$ memory.
+
+\ruler
+
+\vsp
+
+\noindent \textbf{Dis \cite{adaptivesortingsurvey}:}
+The largest distance for which an inversion exists
+\[
+\text{Dis}(X) = \operatorname{max}\{j - i : 1 \leq i < j \leq n, x_i > x_j\}.
+\]
+This takes $O(n)$ time, and $O(n)$ memory.
+
+\ruler
+
+\vsp
+
+\noindent \textbf{Mono \cite{sortingrace2016}:} 
+The minimum number $k$ such that $X$ can be broken into $k$ subarrays where each subarray is \emph{monotonic}. A sequence is monotonic if it is increasing \emph{or} decreasing.
+\[
+\operatorname{Mono}(X)
+=
+\min\Bigl\{
+k \in \mathbb{N}
+:\,\exists\,1 = i_{0} < i_{1} < \cdots < i_{k} = n+1 :
+\Bigr.
+\]
+\[
+\Bigl.
+\forall\, j \in \{1,\dots,k\},
+(X_{i_{j-1}},\,X_{i_{j-1}+1},\dots,X_{i_{j}-1})
+\text{ is monotonic}
+\Bigr\}
+\]
+
+This takes $O(n)$ time, and $O(1)$ memory.
+\ruler
+
+\vsp
+
+\noindent \textit{Note: }These are the only measures of presortedness that have a linear running time. This quality enables them to be used as features of lists for the problem of sorting.
+
+\subsection{Other List Features}
+Aside from the mentioned measures of presortedness, we define five other features:
+
+\begin{enumerate}[itemsep=0.05em, topsep=0pt]
+    \item \textbf{Size:} The total number of elements in the list, 
+    \[
+    \text{Size}(L) = |L|.
+    \]
+    
+    \item \textbf{Average duplicates per unique element:} For a list $L$ with unique elements 
+    $U$, if $|L| = n$, then
+    \[
+    \text{Avg. duplicates} = \frac{n - |U|}{|U|}.
+    \]
+    
+    \item \textbf{Shannon entropy:} With frequency function $f(u)$ for $u\in U$ and $p(u)=\frac{f(u)}{n}$,
+    \[
+    H(L) = -\sum_{u\in U} p(u)\,\log_2 p(u).
+    \]
+    
+    \item \textbf{Categorical skewness:} For categorical data—where each unique category $u\in U$ occurs with frequency $f(u)$ and the mean $\mu$ and standard deviation $\sigma$ are computed over these frequencies—the skewness is defined as 
+    \[
+    \gamma_1 = \frac{1}{|U|}\sum_{u\in U}\left(\frac{f(u)-\mu}{\sigma}\right)^3.
+    \]
+    This measure reflects the asymmetry of the frequency distribution for categorical variables.
+
+    \item \textbf{Categorical kurtosis:} For categorical data with frequencies $f(u)$ for each $u\in U$, the kurtosis is defined by
+    \[
+    \gamma_2 = \frac{1}{|U|}\sum_{u\in U}\left(\frac{f(u)-\mu}{\sigma}\right)^4.
+    \]
+    This measure quantifies the tailedness of the frequency distribution for categorical variables.
+
+\end{enumerate}
+
+\subsection{Sorting Algorithm Selection Problem}
+In our context, the problem space $\mathcal{P}$ consists of datasets that require sorting, and an instance $x \in \mathcal{P}$ is a list to be sorted. The feature space $\mathcal{F}$ is comprised of the size, categorical skewness, categorical kurtosis, Shannon entropy and, most importantly, the three measures of presortedness Runs, Dis, and Mono.
+
+\vsp
+
+Our algorithm space $\mathcal{A}$ includes various sorting algorithms like QuickSort, MergeSort, InsertionSort, and others. For simplicity, our performance space is defined as $\{0,1\}$, where a value of 1 indicates that the selection algorithm has correctly identified the fastest sorter for a given problem instance. We can now more formally state our research question:
 
 \vsp
 
 \noindent \textbf{Given:}
-\begin{itemize}
+\begin{itemize}[itemsep=0.05em, topsep=0pt]
     \item Datasets $\mathcal{P} \ni x$, where $x$ is a list that requires sorting.
-    \item A feature space $\mathcal{F}$, where each $f(x) \in \mathcal{F}$ represents measurable characteristics of a list $x \in \mathcal{P}$.
+    \item A feature space $\mathcal{F}$, containing of the above stated features.
     \item An algorithm space $\mathcal{A}$, containing all applicable sorting algorithms $A_i$.
     \item A performance space $\{0,1\}$, where the performance metric is defined as
     \[
@@ -125,19 +235,7 @@ that maximizes the average number of fastest sorter selections, i.e.,
 \max_{S} \frac{1}{|\mathcal{P}|} \sum_{x \in \mathcal{P}} p(S(f(x)), x).
 \]
 
-
 \section{Methodology}
-
-A good measure of presortedness must satisfy the following criteria:
-\noindent \emph{Let $m$ be a measure of presortedness, and $X, Y$ be lists}:
-\begin{enumerate}
-    \item $m(X) = 0$ if $X$ is \emph{fully sorted in ascending order}.
-    \item if $X = [x_1, \cdots, x_n], Y= [y_1, \cdots, y_n]$ and \\
-    $x_i < x_j$ iff $y_i < y_j$ for all $i$ and $j$, then $m(X) = m(Y)$. 
-    \item if $X \subseteq Y, m(X) \leq m(Y)$.
-    \item if $X < Y$, then $m(XY) \leq m(X) + m(Y)$.
-    \item \emph{For any element} $a$, $m(a + X) \leq |X| + m(X)$.
-\end{enumerate}
 
 \bibliographystyle{plain}
 \bibliography{references}
