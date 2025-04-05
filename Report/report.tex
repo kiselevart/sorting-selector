@@ -76,40 +76,68 @@ Sorting is a fundamental task that appears across various applications in comput
 
 Successfully addressing this question and constructing an effective predictive model would represent a meaningful advancement. Such a model, capable of analyzing a dataset's characteristics and predicting the optimal sorting strategy based on that analysis, could deliver substantial performance improvements over current static approaches. In practical terms, this could significantly enhance efficiency in real-world scenarios, including large-scale database operations, data-intensive computations, and latency-sensitive applications, providing tangible benefits over existing sorting implementations.
 
-\section{Literature Review}
-A critical component in developing a dynamic selection system is determining the relevant features of the input data. Mannila's work on \textit{presortedness} \cite{Mannila1985MeasuresOP} introduces a key concept that quantifies how ordered a dataset already is, which in turn helps to predict the optimal sorting strategy. Building on this, Petersson and Moffat \cite{PETERSSON1995153} propose a refined measure of presortedness that effectively adapts to other known measures in the literature. Further analysis of adaptive sorting techniques is provided by Estvill-Castro and Wood \cite{adaptivesortingsurvey}, who explore a range of presortedness metrics and their implications for sorting efficiency.
+\section{Problem Formalization}
+This question is an instance of the algorithm selection problem, formulated by John Rice in 1976 \cite{ricealgorithmselection}. It is formally stated as follows: \\
+\textbf{Given:}
+\begin{itemize}
+    \item A problem space $\mathcal{P}$, containing all possible problem instances.
+    \item A feature space $\mathcal{F}$, where each $f(x) \in \mathcal{F}$ represents measurable characteristics of problem $x \in \mathcal{P}$.
+    \item An algorithm space $\mathcal{A}$, containing all applicable algorithms $A_i$.
+    \item A performance space $\mathbb{R}^n$, where $p(A_i,x)$ represents the performance of algorithm $A_i \in \mathcal{A}$ on problem $x \in \mathcal{P}$.
+    \item The final algorithm performance metric $||p||$, obtained by normalizing the raw performance measures.
+\end{itemize}
 
-In 2023, Google DeepMind et al. \cite{alphadev} published a work on using Deep Reinforcement Learning to improve existing sorting algorithms, with parts of their findings being incorporated into LLVM. Although this paper may not directly inform the project, it is motivating to see how machine learning methods can enhance sorting algorithm design and performance.
+\noindent \textbf{Find:} A selection mapping 
+\[
+S: \mathcal{F} \rightarrow \mathcal{A}
+\]
+that maximizes performance according to some criteria.
 
-Complementing these theoretical approaches, practical benchmarks are crucial for understanding real-world performance. The benchmarking data compiled on the GitHub page by Morwenn \cite{cppsort_benchmarks} provides detailed empirical measurements of various sorting algorithms under different conditions. This resource will be greatly beneficial towards determining which algorithms should be included in the portfolio.
+\vsp
 
-Finally, Rice’s seminal framework for algorithm selection \cite{ricealgorithmselection} formalizes the process of mapping input characteristics to algorithm performance. This framework will be instrumental when attempting to theoretically formulate and verify the problem, along with the findings and methods of the project.
+In our context, the problem space $\mathcal{P}$ consists of datasets that require sorting. An instance $x \in \mathcal{P}$ is a list to be sorted. The feature space $\mathcal{F}$ comprises measurable characteristics of these datasets, such as size, distribution patterns, Shannon entropy \cite{shannonentropy}, and, most importantly, measures of presortedness. These measures tell us the pre-existing order of a given list \cite{Mannila1985MeasuresOP}.
 
-\section{Proposed Approach}
-The proposed system will incorporate the following components:
+The algorithm space $\mathcal{A}$ includes various sorting algorithms like QuickSort, MergeSort, InsertionSort, and others. For simplicity, our performance space is defined as $\{0,1\}$, where a value of 1 indicates that the selection algorithm has correctly identified the fastest sorter for a given problem instance.
+
+\vsp
+
+\noindent \textbf{Given:}
+\begin{itemize}
+    \item Datasets $\mathcal{P} \ni x$, where $x$ is a list that requires sorting.
+    \item A feature space $\mathcal{F}$, where each $f(x) \in \mathcal{F}$ represents measurable characteristics of a list $x \in \mathcal{P}$.
+    \item An algorithm space $\mathcal{A}$, containing all applicable sorting algorithms $A_i$.
+    \item A performance space $\{0,1\}$, where the performance metric is defined as
+    \[
+    p(A_i, x) = 
+    \begin{cases}
+    1, & \text{if } A_i \text{ is the fastest sorter for } x, \\
+    0, & \text{otherwise.}
+    \end{cases}
+    \]
+\end{itemize}
+
+\noindent \textbf{Find:} A selection mapping
+\[
+S: \mathcal{F} \rightarrow \mathcal{A}
+\]
+that maximizes the average number of fastest sorter selections, i.e.,
+\[
+\max_{S} \frac{1}{|\mathcal{P}|} \sum_{x \in \mathcal{P}} p(S(f(x)), x).
+\]
+
+
+\section{Methodology}
+
+A good measure of presortedness must satisfy the following criteria:
+\noindent \emph{Let $m$ be a measure of presortedness, and $X, Y$ be lists}:
 \begin{enumerate}
-    \item \textbf{Data Profiling Module:} Analyzes incoming data to extract features such as size, existing order (presortedness), and data distribution. Metrics like the number of inversions, runs, las, and others outlined in Mannila's \cite{Mannila1985MeasuresOP} paper will be computed to quantify presortedness.
-    \item \textbf{Algorithm Repository:} Maintains a collection of sorting algorithms with annotated performance characteristics, including time complexity, space complexity, and adaptability to specific data patterns.
-    \item \textbf{Decision Engine:} Employs machine learning models trained on historical data to predict the most suitable sorting algorithm based on the profiled data characteristics. Features for the model may include data size, presortedness measures, and distribution patterns.
-    \item \textbf{Execution Monitor:} Oversees the sorting process, collecting performance metrics to refine the decision engine's predictions over time through reinforcement learning techniques.
+    \item $m(X) = 0$ if $X$ is \emph{fully sorted in ascending order}.
+    \item if $X = [x_1, \cdots, x_n], Y= [y_1, \cdots, y_n]$ and \\
+    $x_i < x_j$ iff $y_i < y_j$ for all $i$ and $j$, then $m(X) = m(Y)$. 
+    \item if $X \subseteq Y, m(X) \leq m(Y)$.
+    \item if $X < Y$, then $m(XY) \leq m(X) + m(Y)$.
+    \item \emph{For any element} $a$, $m(a + X) \leq |X| + m(X)$.
 \end{enumerate}
-
-\noindent My practical approach towards implementing the project will be as follows:
-\begin{enumerate}
-    \item \textbf{Algorithm Selection:} Select sorting algorithms into the algorithm portfolio that have an advantage in a meaningful amount of scenarios. Achieve this by looking at papers mentioned in the literature review.
-    \item \textbf{Dataset Engineering:} Design a varied enough set of input data to test the algorithm portfolio on. Cross-reference this with the literature.
-    \item \textbf{Machine Learning and Feature Selection:} Apply ML techniques on various combinations of features to obtain the most optimal trained model. Will likely perform this using Jupyter Notebooks for convenience.
-    \item \textbf{Exporting Model:} Export the trained model coefficients or decision tree into C++.
-    \item \textbf{Feature Extraction Tooling:} Develop the tooling in C++ to efficiently extract features from the input data and use the trained model to select an algorithm at runtime.
-    \item \textbf{Empirical Testing and Formal Verification:} Expanded on below in the Evaluation section.
-\end{enumerate}
-
-\section{Evaluation}
-The system's performance will be benchmarked against traditional sorting algorithms using datasets with varying sizes and characteristics. Metrics such as execution time, memory usage, and scalability will be measured to evaluate efficiency gains.
-
-The decision engine's predictions will be assessed by comparing the selected algorithm's performance against the optimal choice determined through exhaustive analysis. Metrics will include the percentage of correct selections and the performance gap between the chosen and optimal algorithms.
-
-If time allows, formal theoretical verification of the problem will be attempted on to support or disprove the empirical findings.
 
 \bibliographystyle{plain}
 \bibliography{references}
