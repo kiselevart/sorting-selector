@@ -235,7 +235,28 @@ that maximizes the average number of fastest sorter selections, i.e.,
 \max_{S} \frac{1}{|\mathcal{P}|} \sum_{x \in \mathcal{P}} p(S(f(x)), x).
 \]
 
-\section{Methodology}
+\section{Implementation}
+In this section, I reference specific files used to conduct the analysis, all of which can be found in the project's GitHub repository at \href{https://github.com/kiselevart/sorting-selector/}{\texttt{github.com/kiselevart/sorting-selector/}}.
+
+\subsection{cpp-sort Library Integration}
+This project relies extensively on the \texttt{cpp-sort}\cite{cppsort_benchmarks} library, a C++ library featuring optimized implementations of various state-of-the-art sorting algorithms. Additionally, \texttt{cpp-sort} provides implementations of most measures of presortedness, referred to as probes.
+
+To effectively leverage \texttt{cpp-sort} within Python, I created two separate interface files using \texttt{pybind11}: one file for interfacing with sorting algorithms and another dedicated to probes. These can be found in the \href{https://github.com/kiselevart/sorting-selector/tree/main/Implementation/src}{\texttt{src/}} directory. Utilizing \texttt{pybind11} allowed seamless integration of high-performance compiled C++ code into Python, thus maintaining Python's advantages in flexibility, extensive support for data science tasks, and ease of use within Jupyter Notebooks.
+
+Before proceeding with the main analysis, I conducted preliminary benchmarks to ensure the reliability and efficiency of \texttt{cpp-sort}'s algorithms. The results from these benchmarks, detailed in \texttt{verify\_running\_time.ipynb}, confirmed that the chosen sorting methods performed consistently and significantly outperformed standard alternatives. Specifically, integrating the compiled sorters from \texttt{cpp-sort} provided, on average, a tenfold speedup compared to NumPy's sorting methods and over a fortyfold improvement compared to Python's built-in sorter.
+
+\subsection{Sorters Redundancy Analysis}
+
+\subsection{Probe Analysis}
+
+\subsection{Machine Learning}
+
+\section{Results}
+
+\section{Discussion}
+
+\section{Conclusion}
+This project has made a number of significant 
 
 \bibliographystyle{plain}
 \bibliography{references}
