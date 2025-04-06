@@ -282,17 +282,39 @@ The average ratio across all lists is computed as:
     \bar{r} = \frac{1}{|X|}\sum_{k=1}^{|X|} r_k.
 \]
 
-The resulting heatmap visualization of these ratios can be accessed in  \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/probes_vs_sorts.ipynb}{\texttt{probes\_vs\_sorts.ipynb}}. Analysis of this heatmap, combined with considerations regarding the time complexity of all the presortedness measures clearly indicates that \texttt{Dis}, \texttt{Mono}, and \texttt{Runs} exhibit significantly superior efficiency. Thus, these three probes were selected for the feature space of the predictive model.
+The resulting heatmap visualization of these ratios can be accessed in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/probes_vs_sorts.ipynb}{\texttt{probes\_vs\_sorts.ipynb}}. Analysis of this heatmap, combined with considerations regarding the time complexity of all the presortedness measures clearly indicates that \texttt{Dis}, \texttt{Mono}, and \texttt{Runs} exhibit significantly superior efficiency. Thus, these three probes were selected for the feature space of the predictive model.
 
-\subsection{Machine Learning}
-After experimentally verifying the feature space, a training dataset was synthesized by computing all of the features in $\mathcal{F}$, as well as the fastest sorter for each list. This training set was then used to train a classification machine learning model, with the fastest sorter result being our target. After some experimentation with different models and parameter optimization, a Random Forest Classifier\cite{breiman2001random} model was trained with an accuracy of $89.1\%$.
+\section{Machine Learning and Results}
+After experimentally verifying the feature space, a training dataset was synthesized by computing all of the features in $\mathcal{F}$, as well as the fastest sorter for each list. This training set was then used to train a classification machine learning model, with the fastest sorter result being our target. After some experimentation with different models and parameter optimization, a Random Forest Classifier\cite{breiman2001random} model was trained with an accuracy of $80.7\%$. The details of training the model can be found in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/train_model.ipynb}{\texttt{train\_model.ipynb}}. 
 
-\section{Results}
+\section{Further Work}
+Due to the time constraints of this project, several improvements can be explored, along with numerous promising avenues for deeper research.
 
-\section{Discussion}
+\subsection{Potential Improvements}
+Several aspects of the current work could significantly benefit from enhancements, primarily in data quality and analytical methods. The datasets utilized throughout this project were synthetic, limiting the robustness of the results. Employing real-world data could substantially enhance the rigor and validity of the analysis. Furthermore, the synthetic datasets suffered from imbalances and were insufficiently large for training robust machine learning models. Increasing the dataset size and ensuring balanced class distributions could lead to more accurate and generalizable models.
+
+Furthermore, the redundancy analysis of sorting algorithms relied predominantly on visual and graph-based inspections. While useful for exploratory analysis, such approaches may introduce biases and inaccuracies. Automating this step through statistical or algorithmic measures could reduce subjectivity and improve the reliability of the analysis. Lastly, the algorithm portfolio was significantly reduced for simplicity, which may have led to excluding potentially high-performing or contextually relevant algorithms. Expanding and rigorously evaluating a broader portfolio of sorting algorithms could yield more comprehensive and accurate insights.
+
+\subsection{Areas for Deeper Research}
+Several promising research directions could further extend the scope and applicability of this project:
+
+\begin{itemize}
+    \item \textbf{Enhanced Cost Functions:} Experimenting with more sophisticated or cost functions could lead to better model performance. For example, cost functions could aim to minimize the squared difference or absolute deviation between predicted sorter performance and the optimal sorter, rather than relying solely on categorical accuracy. 
+
+    \item \textbf{Hybrid Model Development:} Investigating hybrid approaches that combine learned predictive models with manually engineered heuristics would almost certainly yield benefits. For instance, manually overriding the model's predictions with counting sort when inputs are known integers within a small, bounded range could enhance overall efficiency and accuracy.
+
+    \vsp 
+
+    \item \textbf{Approximation of Presortedness Metrics:} Developing methods to approximate presortedness could significantly enrich the feature space and thus improve model performance.
+
+\end{itemize}
+
+Each of these areas represents significant potential for deeper exploration and could substantially advance this research topic.
 
 \section{Conclusion}
-This project has made a number of significant 
+This project has successfully demonstrated the viability of using machine learning techniques to predict sorting algorithm performance based on input data features. Despite limitations due to synthetic data and algorithm simplifications, the results provided valuable insights and established a foundation for further enhancements. By addressing these limitations through improved data quality, expanded algorithm portfolios, and more rigorous analytical approaches, future research can significantly enhance predictive accuracy and robustness. 
+
+Exploring advanced cost functions, hybrid models, presortedness metrics, and enhanced feature engineering promises to expand the utility and effectiveness of the predictive models developed. Successfully implementing these improvements could significantly enhance efficiency in real-world scenarios, including large-scale database operations, data-intensive computations, and latency-sensitive applications, providing tangible benefits over existing sorting implementations.
 
 \bibliographystyle{plain}
 \bibliography{references}

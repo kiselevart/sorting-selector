@@ -28,11 +28,11 @@ std::function<void(std::vector<double>&)> create_sorter_func() {
 
 std::function<void(std::vector<double>&)> get_sorter_by_name(const std::string& name) {
     //if (name == "counting_sort")      return create_sorter_func<cppsort::counting_sorter>();
-    if (name == "heap_sort")          return create_sorter_func<cppsort::heap_sorter>();
+    //if (name == "heap_sort")          return create_sorter_func<cppsort::heap_sorter>();
     if (name == "insertion_sort")     return create_sorter_func<cppsort::insertion_sorter>();
     if (name == "merge_sort")         return create_sorter_func<cppsort::merge_sorter>();
     if (name == "quick_sort")         return create_sorter_func<cppsort::quick_sorter>();
-    if (name == "quick_merge_sort")   return create_sorter_func<cppsort::quick_merge_sorter>();
+    //if (name == "quick_merge_sort")   return create_sorter_func<cppsort::quick_merge_sorter>();
     //if (name == "ska_sort")           return create_sorter_func<cppsort::ska_sorter>();
     if (name == "spin_sort")          return create_sorter_func<cppsort::spin_sorter>();
     //if (name == "spread_sort")        return create_sorter_func<cppsort::spread_sorter>();
@@ -63,8 +63,8 @@ PYBIND11_MODULE(sorters, m) {
 
     m.def("list_sorters", []() {
         return std::vector<std::string>{ // counting_sort removed
-            "heap_sort", "insertion_sort", "merge_sort",
-            "quick_sort", "quick_merge_sort", "spin_sort",
+            "insertion_sort", "merge_sort",
+            "quick_sort", "spin_sort",
             "std_sort", "tim_sort"
             // "counting_sort", "ska_sort", "spread_sort"
         };

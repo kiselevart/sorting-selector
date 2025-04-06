@@ -113,13 +113,6 @@ def extract_features(arr):
     n = len(arr)
     features['size'] = n
 
-    # Compute range if possible (if the array is numeric)
-    try:
-        features['range'] = float(max(arr)) - float(min(arr))
-    except Exception:
-        features['range'] = None
-
-    features['avg_dup_pos'] = find_avg_dup_pos(arr)
     features['avg_dup_distinct'] = find_avg_dup_distinct(arr)
     features['entropy'] = find_entropy(arr)
     features['dis'] = find_dis(arr)

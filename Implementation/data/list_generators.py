@@ -45,11 +45,13 @@ def disorder_list(lst, disorder_ratio=0.05):
     return new_lst
 
 def generate_random_list(n):
+    """Shuffle a sorted list."""
     lst = generate_list(n)
     random.shuffle(lst)
     return lst
 
 def generate_reversed_list(n):
+    """Return a reversed sorted list."""
     return reverse_list(generate_list(n))
 
 def generate_uniform_list(n, low=0, high=100):
@@ -74,49 +76,54 @@ def generate_geometric_list(n, start=1, ratio=2):
 def generate_sinewave_list(n, amplitude=1, frequency=1.0, noise=0.1):
     return [amplitude * math.sin(frequency * i) + random.uniform(-noise, noise) for i in range(n)]
 
-def main():
-    sizes = [10, 100, 1000, 10000]
-    #sizes.append(int(1e5))
-    #sizes.append(int(1e6))
-    #sizes.append(int(2e6))
-    dataset = {}
-
+def create_varied_dataset(total_lists=1000, min_size=1000, max_size=1000000):
+    """
+    Generate a dataset with `total_lists` lists.
+    Each list has a random size between min_size and max_size,
+    and a random type chosen from various generation strategies.
+    """
+    # Define the list types to choose from.
+    # For types with parameters (like disorder and duplicates), we encode the parameter in the string.
     list_types = [
         "random", "reversed", 
         "disorder_0.05", "disorder_0.10", "disorder_0.20", 
-        "duplicates_0.01", "duplicates_0.1", "duplicates_0.2", "uniform", "normal", 
-        "exponential", "zipf", "clustered", "sinewave"
+        "duplicates_0.01", "duplicates_0.1", "duplicates_0.2", 
+        "uniform", "normal", "exponential", "zipf", "clustered", "sinewave"
     ]
-
     rows = []
+    
+    for _ in tqdm(range(total_lists), desc="Generating varied lists"):
+        size = random.randint(min_size, max_size)
+        list_type = random.choice(list_types)
+        args = list_type.split("_")
+        
+        # For "disorder" and "duplicates", we need a base list.
+        if args[0] == "disorder":
+            base_list = generate_list(size)
+            result = disorder_list(base_list.copy(), float(args[1]))
+        elif args[0] == "duplicates":
+            result = generate_duplicates_list_ratio(size, float(args[1]))
+        else:
+            # For other list types, dynamically find the corresponding function.
+            # e.g., for "random", we call generate_random_list.
+            func_name = f"generate_{args[0]}_list"
+            func = globals().get(func_name)
+            if not callable(func):
+                raise ValueError(f"No function named {func_name} found")
+            result = func(size)
+        
+        rows.append({
+            "list_type": list_type,
+            "size": size,
+            "data": result
+        })
+    
+    return pd.DataFrame(rows)
 
-    for size in tqdm(sizes, desc="Generating lists"):
-        base_list = generate_list(size)
 
-        for list_type in tqdm(list_types, desc=f"Processing size {size}", leave=False):
-            args = list_type.split("_")
-
-            for _ in range(1000):
-                if args[0] == "disorder":
-                    result = disorder_list(base_list.copy(), float(args[1]))
-
-                elif args[0] == "duplicates":
-                    result = generate_duplicates_list_ratio(size, float(args[1]))
-
-                else:
-                    func = globals().get(f"generate_{args[0]}_list")
-                    if not callable(func):
-                        raise ValueError(f"No function named generate_{args[0]}_list")
-                    result = func(size)
-
-                rows.append({
-                    "list_type": list_type,
-                    "data": result
-                })
-
-    df = pd.DataFrame(rows)
-    df.to_feather("varied_dataset.feather")
-    print("Dataset generation complete. Saved to varied_dataset.feather")
+# --- Main Execution ---
 
 if __name__ == "__main__":
-    main()
+    df = create_varied_dataset(total_lists=1000, min_size=1000, max_size=1000000)
+    df.to_feather("testing_dataset.feather")
+    print("Dataset generation complete. Saved to testing_dataset.feather")
