@@ -1,6 +1,7 @@
 \documentclass[twocolumn]{article}
 
 \usepackage{graphicx} % Required for inserting images
+\usepackage{multicol}
 \usepackage{placeins}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -235,21 +236,56 @@ that maximizes the average number of fastest sorter selections, i.e.,
 \max_{S} \frac{1}{|\mathcal{P}|} \sum_{x \in \mathcal{P}} p(S(f(x)), x).
 \]
 
-\section{Implementation}
-In this section, I reference specific files used to conduct the analysis, all of which can be found in the project's GitHub repository at \href{https://github.com/kiselevart/sorting-selector/}{\texttt{github.com/kiselevart/sorting-selector/}}.
+\section{Analysis and Implementation}
+In this section, I reference specific files used to conduct the analysis, all of which can be found in the project's GitHub repository at 
+
+\begin{center}
+\href{https://github.com/kiselevart/sorting-selector/}{\texttt{github.com/kiselevart/sorting-selector/}}.
+\end{center}
 
 \subsection{cpp-sort Library Integration}
 This project relies extensively on the \texttt{cpp-sort}\cite{cppsort_benchmarks} library, a C++ library featuring optimized implementations of various state-of-the-art sorting algorithms. Additionally, \texttt{cpp-sort} provides implementations of most measures of presortedness, referred to as probes.
 
 To effectively leverage \texttt{cpp-sort} within Python, I created two separate interface files using \texttt{pybind11}: one file for interfacing with sorting algorithms and another dedicated to probes. These can be found in the \href{https://github.com/kiselevart/sorting-selector/tree/main/Implementation/src}{\texttt{src/}} directory. Utilizing \texttt{pybind11} allowed seamless integration of high-performance compiled C++ code into Python, thus maintaining Python's advantages in flexibility, extensive support for data science tasks, and ease of use within Jupyter Notebooks.
 
-Before proceeding with the main analysis, I conducted preliminary benchmarks to ensure the reliability and efficiency of \texttt{cpp-sort}'s algorithms. The results from these benchmarks, detailed in \texttt{verify\_running\_time.ipynb}, confirmed that the chosen sorting methods performed consistently and significantly outperformed standard alternatives. Specifically, integrating the compiled sorters from \texttt{cpp-sort} provided, on average, a tenfold speedup compared to NumPy's sorting methods and over a fortyfold improvement compared to Python's built-in sorter.
+Before proceeding with the main analysis, I conducted preliminary benchmarks to ensure the reliability and efficiency of \texttt{cpp-sort}'s algorithms. The results from these benchmarks, detailed in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/verify_running_time.ipynb}{\texttt{verify\_running\_time.ipynb}}, confirmed that the chosen sorting methods performed consistently and significantly outperformed standard alternatives. Specifically, integrating the compiled sorters from \texttt{cpp-sort} provided, on average, a tenfold speedup compared to NumPy's sorting methods and over a fortyfold improvement compared to Python's built-in sorter.
 
 \subsection{Sorters Redundancy Analysis}
 
+After verifying the usability of the sorters within the \texttt{cpp-sort} library, I performed a "redundancy analysis" to identify and remove sorters that do not provide unique advantages over others. This process involved benchmarking various sorters across multiple datasets and visually analyzing performance graphs to detect any that were consistently outperformed. To confirm these observations, I conducted direct comparisons between selected algorithm pairs. The detailed analysis and graphs can be found in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/compare_sorts.ipynb}{\texttt{compare\_sorts.ipynb}}.
+
+Based on this analysis, the following eight sorters were retained:
+\begin{multicols}{2}
+\begin{itemize}[itemsep=0.05em, topsep=0pt]
+    \item \textbf{heap\_sort}
+    \item \textbf{insertion\_sort}
+    \item \textbf{merge\_sort}
+    \item \textbf{quick\_sort}
+    \item \textbf{quick\_merge\_sort}
+    \item \textbf{spin\_sort}
+    \item \textbf{std\_sort}
+    \item \textbf{tim\_sort}
+\end{itemize}
+\end{multicols}
+
+These selected sorters offer a diverse set of strategies and performance characteristics, ensuring robust and efficient sorting capabilities across various types of datasets.
+
 \subsection{Probe Analysis}
+The next step of the project involved an analysis of the available probes within the \texttt{cpp-sort} library. To achieve this, we computed the relative performance of each probe by evaluating the ratio between the execution time of each probe and the actual sorting time for every given list.
+
+Formally, let $m_i$ represent a probe, $A_j$ a sorting algorithm, and $X_k \in X$ a specific list. Then, the ratio for a single list is defined as:
+\[
+    r_k = \frac{m_i(X_k)}{A_j(X_k)}
+\]
+The average ratio across all lists is computed as:
+\[
+    \bar{r} = \frac{1}{|X|}\sum_{k=1}^{|X|} r_k.
+\]
+
+The resulting heatmap visualization of these ratios can be accessed in  \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/probes_vs_sorts.ipynb}{\texttt{probes\_vs\_sorts.ipynb}}. Analysis of this heatmap, combined with considerations regarding the time complexity of all the presortedness measures clearly indicates that \texttt{Dis}, \texttt{Mono}, and \texttt{Runs} exhibit significantly superior efficiency. Thus, these three probes were selected for the feature space of the predictive model.
 
 \subsection{Machine Learning}
+After experimentally verifying the feature space, a training dataset was synthesized by computing all of the features in $\mathcal{F}$, as well as the fastest sorter for each list. This training set was then used to train a classification machine learning model, with the fastest sorter result being our target. After some experimentation with different models and parameter optimization, a Random Forest Classifier\cite{breiman2001random} model was trained with an accuracy of $89.1\%$.
 
 \section{Results}
 
