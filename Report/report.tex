@@ -8,7 +8,7 @@
 \usepackage{amsthm}
 \usepackage{listings}
 \usepackage{amssymb}
-\usepackage[a4paper, left=0.5in, right=0.5in, top=1in, bottom=1in]{geometry}
+\usepackage[a4paper, left=0.5in, right=0.5in, top=0.6in, bottom=0.6in]{geometry}
 \usepackage{xcolor}
 \usepackage{tikz}
 \usepackage{float}
@@ -23,7 +23,9 @@
 \usepackage{enumitem}
 \usepackage{titlesec}
 
-\titlespacing*{\section}{0pt}{1ex}{1ex}
+\titlespacing*{\section}{0pt}{0.9ex}{0.9ex}
+\titlespacing*{\subsection}{0pt}{0.7ex}{0.7ex}
+\titlespacing*{\subsubsection}{0pt}{0.7ex}{0.7ex}
 
 %\allsectionsfont{\sffamily\bfseries}
 \pretitle{\begin{center}\sffamily\bfseries\Large}
@@ -122,7 +124,7 @@ For this project, I will explicitly mention the following three measures of pres
 \vsp
 
 
-\noindent \textbf{Runs \cite{knuth1973}:}
+\noindent \textbf{Runs \cite{Knuth1973}:}
 The number of maximal contiguous ascending subsequences in a list $X$. 
 \[
 \text{Runs}(X) = \left|\{i : 1 \leq i < n \text{ and } a_{i+1} < a_i\}\right|.
@@ -144,7 +146,7 @@ This takes $O(n)$ time, and $O(n)$ memory.
 
 \vsp
 
-\noindent \textbf{Mono \cite{sortingrace2016}:} 
+\noindent \textbf{Mono \cite{zhang2016sortrace}:} 
 The minimum number $k$ such that $X$ can be broken into $k$ subarrays where each subarray is \emph{monotonic}. A sequence is monotonic if it is increasing \emph{or} decreasing.
 \[
 \operatorname{Mono}(X)
@@ -285,7 +287,66 @@ The average ratio across all lists is computed as:
 The resulting heatmap visualization of these ratios can be accessed in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/probes_vs_sorts.ipynb}{\texttt{probes\_vs\_sorts.ipynb}}. Analysis of this heatmap, combined with considerations regarding the time complexity of all the presortedness measures clearly indicates that \texttt{Dis}, \texttt{Mono}, and \texttt{Runs} exhibit significantly superior efficiency. Thus, these three probes were selected for the feature space of the predictive model.
 
 \section{Machine Learning and Results}
-After experimentally verifying the feature space, a training dataset was synthesized by computing all of the features in $\mathcal{F}$, as well as the fastest sorter for each list. This training set was then used to train a classification machine learning model, with the fastest sorter result being our target. After some experimentation with different models and parameter optimization, a Random Forest Classifier\cite{breiman2001random} model was trained with an accuracy of $80.7\%$. The details of training the model can be found in \href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/train_model.ipynb}{\texttt{train\_model.ipynb}}. 
+\label{sec:machine_learning}
+
+After experimentally verifying the feature space, 
+we synthesized a training dataset by computing all features in $\mathcal{F}$ and recording the 
+fastest sorter for each list instance. Using these labeled data, we trained a classification 
+model where the target variable was the fastest sorter. After exploring various algorithms and optimizing parameters, a Random 
+Forest Classifier~\cite{breiman2001random} yielded the highest overall accuracy of $80.7\%$. 
+Details on the training process can be found in 
+\href{https://github.com/kiselevart/sorting-selector/blob/main/Implementation/analysis/train_model.ipynb}{\texttt{train\_model.ipynb}}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{../Implementation/figures/classification_report_heatmap.png}
+  \caption{Classification Report Heatmap of the Random Forest Model}
+  \label{fig:my_image}
+\end{figure}
+
+Figure~\ref{fig:my_image} shows a classification report heatmap for the trained model. The model 
+classifies \texttt{tim\_sort} and \texttt{insertion\_sort} with notably high accuracy, likely 
+because their performance characteristics differ distinctly from the other algorithms. By contrast, 
+\texttt{merge\_sort} shows a high misclassification rate. 
+
+One probable cause is a consistent performance spike around lists of size $750{,}000$ to $800{,}000$ 
+elements, as shown in Figure~\ref{fig:merge_spike}. This spike may arise from caching or 
+memory-access patterns specific to \texttt{merge\_sort}, which significantly degrades its performance 
+in that narrow range of input sizes. Consequently, the model undervalues \texttt{merge\_sort} and 
+fails to predict it even when it would otherwise be optimal.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.48\textwidth]{../Implementation/figures/merge_sort_problem.png}
+  \caption{Performance Spike of \texttt{merge\_sort} (blue) Around 750--800k Elements}
+  \label{fig:merge_spike}
+\end{figure}
+
+Turning to feature importance (Figure~\ref{fig:features}), the three presortedness metrics 
+clearly dominate as the most significant features. This aligns well with the intuition 
+that knowing how close a list is to being sorted is critical when predicting the optimal 
+sorting algorithm.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.45\textwidth]{../Implementation/figures/feature_importances.png}
+  \caption{Feature Importances from the Random Forest Classifier}
+  \label{fig:features}
+\end{figure}
+
+To further assess the model's performance in practice, Figure~\ref{fig:cases} compares the 
+running time of the model's predicted sorter (blue) against each static sorter (orange) 
+across $35{,}000$ test cases. While there are certain anomalies, the predictor generally 
+runs comparably to the slower among the static sorters, which is a promising start for this initial 
+model. Through implementing and researching the refinements that will be discussed below, there is a good chance that the predictive model could 
+approach the performance of the optimal sorter on each instance.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.45\textwidth]{../Implementation/figures/35000cases.png}
+  \caption{Comparison of Model Predictions (blue) vs.\ Static Sorters (orange) Over 35,000 Cases}
+  \label{fig:cases}
+\end{figure}
 
 \section{Further Work}
 Due to the time constraints of this project, several improvements can be explored, along with numerous promising avenues for deeper research.
@@ -304,6 +365,7 @@ Several promising research directions could further extend the scope and applica
     \item \textbf{Hybrid Model Development:} Investigating hybrid approaches that combine learned predictive models with manually engineered heuristics would almost certainly yield benefits. For instance, manually overriding the model's predictions with counting sort when inputs are known integers within a small, bounded range could enhance overall efficiency and accuracy.
 
     \vsp 
+    \vsp
 
     \item \textbf{Approximation of Presortedness Metrics:} Developing methods to approximate presortedness could significantly enrich the feature space and thus improve model performance.
 
